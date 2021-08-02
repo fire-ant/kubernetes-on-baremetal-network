@@ -1,0 +1,17 @@
+- name: Get join token
+  ansible.builtin.slurp:
+    src: "{{ token_path }}"
+  register: token
+  when: '"localhost" in inventory_hostname'
+
+- name: Get control plane url
+  set_fact: cp_url="https://{{ hostvars[inventory_hostname]['ansible_' + intf]['ipv4']['address'] }}:6443"
+  when: '"localhost" in inventory_hostname'
+
+- name: Save token
+  set_fact: token="{{ hostvars['localhost']['token'] }}"
+  when: '"leaf" in inventory_hostname'
+
+- name: Save control plane url
+  set_fact: cp_url="{{ hostvars['localhost']['cp_url'] }}"
+  when: '"leaf" in inventory_hostname'

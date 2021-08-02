@@ -1,0 +1,6 @@
+- name: Install kubectl
+  ansible.builtin.get_url:
+    url: "{{ kubectl_url }}"
+    dest: "{{ kubectl_dir }}"
+    mode: +x
+

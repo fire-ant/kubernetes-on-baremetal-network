@@ -1,0 +1,22 @@
+- name: Create a CNI direcotires
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop: 
+  - "{{ bin_dir }}"
+  - "{{ etc_dir }}"
+
+- name: Unarchive a file that needs to be downloaded 
+  ansible.builtin.unarchive:
+    src: "{{ cni_url }}"
+    dest: "{{ bin_dir }}"
+    remote_src: yes
+
+- name: Create CNI config
+  ansible.builtin.template:
+    src: 00-bridge.conf
+    dest: "{{ etc_dir }}/00-bridge.conf"
+    owner: root
+    group: root
+    mode: '0644'

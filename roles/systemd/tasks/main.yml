@@ -1,0 +1,35 @@
+- name: Start docker service
+  ansible.builtin.systemd:
+    state: started
+    name: docker
+
+
+- name: Create systemd defaults
+  ansible.builtin.template:
+    src: "defaults.{{role}}.j2"
+    dest: "{{systemd_defaults}}"
+    owner: root
+    group: root
+    mode: '0644'
+  vars:
+    node_ip: "{{ hostvars[inventory_hostname]['ansible_' + intf]['ipv4']['address'] }}"
+    node_name: "{{ hostvars[inventory_hostname]['ansible_hostname'] }}"
+    node_token: "{{ token.content | b64decode | default('') | trim }}"
+    control_plane_url: "{{ cp_url | default('') }}"
+  notify: restart k3s
+
+- name: Create systemd unit
+  ansible.builtin.template:
+    src: "systemd.{{role}}.j2"
+    dest: "{{systemd_unit}}"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart k3s
+
+- name: Start k3s
+  ansible.builtin.systemd:
+    state: started
+    daemon_reload: yes
+    enabled: yes
+    name: k3s

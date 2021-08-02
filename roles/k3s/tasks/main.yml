@@ -1,0 +1,6 @@
+- name: Unarchive a file that needs to be downloaded 
+  ansible.builtin.get_url:
+    url: "{{ k3s_url }}"
+    dest: "{{ k3s_dir }}"
+    mode: +x
+

@@ -1,0 +1,29 @@
+- name: Update the apt package index and install packages to allow apt to use a repository over HTTPS
+  ansible.builtin.apt: 
+    pkg: "{{ docker_prerequisites }}"
+
+- name: Add Docker’s official GPG key
+  ansible.builtin.shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --yes --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+
+- name: Set up the stable repository
+  ansible.builtin.shell: |
+    echo \
+    "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+- name: Install the latest version of Docker Engine and containerd
+  apt:
+    name: "{{ docker_packages }}"
+    update_cache: yes
+
+- name: Start docker service
+  ansible.builtin.systemd:
+    state: started
+    name: docker
+
+- name: add cumulus to docker group
+  ansible.builtin.user:
+    name: cumulus
+    groups: sudo, docker
+    append: yes

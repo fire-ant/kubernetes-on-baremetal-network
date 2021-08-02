@@ -1,0 +1,53 @@
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: leaf01
+spec:
+  selector:
+    matchLabels:
+      app: leaf01
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: leaf01
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - leaf01
+      hostNetwork: true
+      containers:
+      - name: k8soncl
+        image: networkop/k8soncl
+        imagePullPolicy: Always
+        volumeMounts:
+        - mountPath: /etc/network
+          name: network-settings
+        - mountPath: /tmp/intfs
+          name: access-interface-config
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+            - SYS_MODULE
+          privileged: true
+      tolerations:
+      - key: "cumulus"
+        operator: Equal
+        value: "leaf01"
+        effect: NoSchedule
+      volumes:
+      - configMap:
+          name: leaf01
+        name: access-interface-config
+      - hostPath:
+          path: /etc/network
+          type: Directory
+        name: network-settings

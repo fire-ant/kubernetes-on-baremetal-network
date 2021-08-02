@@ -1,0 +1,59 @@
+- name: Download depenencies
+  hosts: localhost leaf01 leaf02
+  become: true
+  gather_facts: false
+  vars_files:
+  - ./vars/input.yml
+  
+  roles:
+  - { role: cni }
+  - { role: k3s }
+  
+  tags:
+  - download
+
+- name: Bootstrap the control plane
+  hosts: localhost
+  become: true
+  gather_facts: true
+  vars_files:
+  - ./vars/input.yml
+
+  roles:
+  - { role: docker_install }
+  - { role: systemd, vars: { intf: "eth1", role: "master" } }
+  - { role: tools }
+  
+  tags:
+  - deploy
+
+- name: Sync variables between plays
+  hosts: localhost leaf01 leaf02
+  become: true
+  gather_facts: false
+  roles:
+  - { role: sync_data, vars: { intf: "eth1" } }
+  tags:
+  - deploy
+
+- name: Bootstrap the worker nodes
+  hosts: leaf01 leaf02
+  become: true
+  gather_facts: true
+  vars_files:
+    - ./vars/input.yml
+
+  roles:
+  - { role: systemd, vars: { intf: "eth0", role: "worker" }}
+  tags:
+  - deploy
+
+- name: Provision Cumulus nodes
+  hosts: localhost leaf01 leaf02
+  become: true
+  gather_facts: false
+  
+  roles:
+  - { role: provision }
+  tags:
+  - provision

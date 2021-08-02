@@ -1,0 +1,6 @@
+DISABLE_FLANNEL=--no-flannel
+NODE_IP=--node-ip {{ node_ip }}
+KUBELET_ARG=--kubelet-arg="feature-gates=SupportPodPidsLimit=true"
+K3S_TOKEN={{ node_token }}
+K3S_NODE_NAME={{ node_name }}
+K3S_URL={{ control_plane_url }}

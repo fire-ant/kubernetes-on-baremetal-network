@@ -1,0 +1,4 @@
+intf: eth0
+role: worker
+systemd_defaults: /etc/default/k3s
+systemd_unit:  /etc/systemd/system/k3s.service
